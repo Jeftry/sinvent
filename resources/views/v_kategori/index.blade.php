@@ -23,18 +23,19 @@
                     @endif
 
                     <form action="{{ route('kategori.index') }}" method="GET">
-                        <div class="input-group">
+                        <div class="input-group mb-3">
                             <input type="text" name="search" class="form-control" placeholder="Cari kategori..." value="{{ request()->input('search') }}">
                             <div class="input-group-append">
-                                <button class="btn btn-secondary" type="submit"><i class="fa fa-search"></i></button>
+                                <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
                             </div>
                             @if(request()->filled('search'))
                             <div class="input-group-append">
-                                <a href="{{ route('kategori.index') }}" class="btn btn-secondary"><i class="fa fa-times"></i></a>
+                                <a href="{{ route('kategori.index') }}" class="btn btn-danger"><i class="fa fa-times"></i></a>
                             </div>
                             @endif
                         </div>
                     </form>
+
 
                     <table class="table table-hover">
                         <thead>

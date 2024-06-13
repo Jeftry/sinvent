@@ -3,6 +3,9 @@
 @section('content')
     <div class="container">
         <div class="row">
+        <div class="pull-left">
+            <h4 class="font-weight-bold mb-3">DAFTAR BARANG KELUAR</h4>
+        </div>
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
@@ -13,9 +16,9 @@
                             </div>
                         @endif
 
-                        @if(session('Gagal'))
+                        @if(session('error'))
                             <div class="alert alert-danger mt-3">
-                                {{ session('Gagal') }}
+                                {{ session('error') }}
                             </div>
                         @endif
                     </div>

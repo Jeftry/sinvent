@@ -3,6 +3,9 @@
 @section('content')
     <div class="container">
         <div class="row">
+        <div class="pull-left">
+            <h4 class="font-weight-bold mb-3">DAFTAR BARANG MASUK</h4>
+        </div>
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">

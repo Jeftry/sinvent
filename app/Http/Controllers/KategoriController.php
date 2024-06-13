@@ -53,21 +53,51 @@ class KategoriController extends Controller
     public function store(Request $request)
     {
         // Validasi input
-        $request->validate([
-            'deskripsi' => 'required|unique:kategori',
-            'kategori' => 'required',
-        ], [
-            'deskripsi.required' => 'Deskripsi kategori harus diisi.',
-            'deskripsi.unique' => 'Kategori sudah ada.',
-            'kategori.required' => 'Kategori harus diisi.',
-        ]);
+        // $request->validate([
+        //     'deskripsi' => 'required|unique:kategori',
+        //     'kategori' => 'required',
+        // ], [
+        //     'deskripsi.required' => 'Deskripsi kategori harus diisi.',
+        //     'deskripsi.unique' => 'Kategori sudah ada.',
+        //     'kategori.required' => 'Kategori harus diisi.',
+        // ]);
 
-        // Buat kategori baru
+        // // Buat kategori baru
+        // Kategori::create([
+        //     'deskripsi' => $request->deskripsi,
+        //     'kategori' => $request->kategori,
+        //     'ketKategori' => $request->ketKategori // Sesuaikan dengan field yang ada di tabel kategori
+        // ]);
+        try {
+            DB::beginTransaction(); // <= Starting the transaction
+            // Insert a new order history
+            DB::table('kategori')->insert([
+                'order_id' => $orderID,
+                'status' => 'pending',
+            ]);
+        
+            DB::commit(); // <= Commit the changes
+        } catch (\Exception $e) {
+            report($e);
+            
+            DB::rollBack(); // <= Rollback in case of an exception
+        }
+
+        $existingKategori = Kategori::where('deskripsi', $request->deskripsi)->first();
+
+        if ($existingKategori) {
+            // Jika kategori dengan nama yang sama sudah ada, kembalikan error
+            return redirect()->route('kategori.create')->withErrors([
+                'error' => 'Kategori dengan nama yang sama sudah ada.',
+            ])->withInput();
+        }
+
+        
         Kategori::create([
             'deskripsi' => $request->deskripsi,
             'kategori' => $request->kategori,
-            'ketKategori' => $request->ketKategori // Sesuaikan dengan field yang ada di tabel kategori
         ]);
+
 
         // Redirect ke halaman index kategori dengan pesan sukses
         return redirect()->route('kategori.index')->with('success', 'Data Berhasil Disimpan!');
@@ -124,11 +154,56 @@ class KategoriController extends Controller
     public function destroy(string $id)
     {
         if (DB::table('barang')->where('kategori_id', $id)->exists()) {
-            return redirect()->route('kategori.index')->with(['gagal' => 'Data Gagal Dihapus!']);
+            return redirect()->route('kategori.index')->with(['error' => 'Data Gagal Dihapus karena terkait tabel barang!']);
         } else {
             $rsetKategori = Kategori::findOrFail($id);
             $rsetKategori->delete();
             return redirect()->route('kategori.index')->with(['success' => 'Data Berhasil Dihapus!']);
         }
+    }
+
+    function updateAPIKategori(Request $request, $kategori_id){
+        $kategori = Kategori::find($kategori_id);
+
+        if (null == $kategori){
+            return response()->json(['status'=>"kategori tidak ditemukan"]);
+        }
+
+         $kategori->deskripsi= $request->deskripsi;
+         $kategori->kategori = $request->kategori;
+         $kategori->save();
+
+        return response()->json(["status"=>"kategori berhasil diubah"]);
+    }
+
+    // function untuk membuat index api
+    function showAPIKategori(Request $request){
+        $kategori = Kategori::all();
+        return response()->json($kategori);
+    }
+
+    // function untuk create api
+    function buatAPIKategori(Request $request){
+        $request->validate([
+            'deskripsi' => 'required|string|max:100',
+            'kategori' => 'required|in:M,A,BHP,BTHP',
+        ]);
+
+        // Simpan data kategori
+        $kat = Kategori::create([
+            'deskripsi' => $request->deskripsi,
+            'kategori' => $request->kategori,
+        ]);
+
+        return response()->json(["status"=>"data berhasil dibuat"]);
+    }
+
+    // function untuk delete api
+    function hapusAPIKategori($kategori_id){
+
+        $del_kategori = Kategori::findOrFail($kategori_id);
+        $del_kategori -> delete();
+
+        return response()->json(["status"=>"data berhasil dihapus"]);
     }
 }

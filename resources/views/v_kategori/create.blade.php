@@ -14,7 +14,7 @@
                                 <input type="text" class="form-control @error('deskripsi') is-invalid @enderror" name="deskripsi" value="{{ old('deskripsi') }}" placeholder="Masukkan kategori barang">
                             
                                 <!-- error message untuk merk -->
-                                @error('merk')
+                                @error('deskripsi')
                                     <div class="alert alert-danger mt-2">
                                         {{ $message }}
                                     </div>
