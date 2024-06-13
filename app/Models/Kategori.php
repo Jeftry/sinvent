@@ -38,6 +38,8 @@ class Kategori extends Model
             ->select('kategori.id', 'deskripsi', 'kategori', DB::raw('ketKategori(kategori.kategori) as ketKategori'))
             ->get();
     }
+
+
     
     
 

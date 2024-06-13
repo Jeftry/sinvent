@@ -65,7 +65,7 @@
                                     @enderror
                                 </div>
                                 <div class="form-group text-center">
-                                    <button type="submit" class="btn btn-primary">Register Account</button>
+                                    <button type="submit" class="btn btn-primary btn-user btn-block">Register Account</button>
                                 </div>
 
                                 <hr>

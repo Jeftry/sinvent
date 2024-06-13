@@ -11,14 +11,38 @@ use Illuminate\Support\Facades\Storage;
 
 class BarangmasukController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil data dari tabel 'barangmasuk' menggunakan Eloquent ORM dengan relasi ke 'barang'
-        $barangmasuk = Barangmasuk::with('barang')->latest()->paginate(10);
+        $search = $request->input('search');
+        $tgl_masuk = $request->input('tgl_masuk');
+        $qty_masuk = $request->input('qty_masuk');
 
-        return view('v_barangmasuk.index', compact('barangmasuk'));
-        
+        // Ambil semua barangmasuk dengan pencarian
+        $barangmasuk = BarangMasuk::with('barang')
+            ->when($search, function ($query, $search) {
+                return $query->whereHas('barang', function ($query) use ($search) {
+                    $query->where('merk', 'like', '%' . $search . '%')
+                        ->orWhere('seri', 'like', '%' . $search . '%')
+                        ->orWhereHas('kategori', function ($query) use ($search) {
+                            $query->where('deskripsi', 'like', '%' . $search . '%');
+                        });
+                });
+            })
+            ->when($tgl_masuk, function ($query, $tgl_masuk) {
+                return $query->whereDate('tgl_masuk', $tgl_masuk);
+            })
+            ->when($qty_masuk, function ($query, $qty_masuk) {
+                return $query->where('qty_masuk', $qty_masuk);
+            })
+            ->latest()
+            ->paginate(2);
+
+            $barangmasuk->appends(['search' => $search, 'tgl_masuk' => $tgl_masuk, 'qty_masuk' => $qty_masuk]);
+
+
+        return view('v_barangmasuk.index', compact('barangmasuk', 'search', 'tgl_masuk', 'qty_masuk'));
     }
+
 
     public function create()
     {
@@ -69,6 +93,8 @@ class BarangmasukController extends Controller
         // Mengambil data barang masuk untuk diedit berdasarkan ID
         $barangmasuk = Barangmasuk::findOrFail($id);
         $merkBarang = Barang::pluck('merk', 'id');
+        //$abarangmasuk = Barang::all();
+
     
         return view('v_barangmasuk.edit', compact('barangmasuk', 'merkBarang'));
     }
@@ -79,6 +105,7 @@ class BarangmasukController extends Controller
         $validatedData = $request->validate([
             'tgl_masuk' => 'required',
             'qty_masuk' => 'required|numeric|min:0',
+            'barang_id'     => 'required',
             // Tambahkan validasi lainnya sesuai kebutuhan
         ]);
     
@@ -104,14 +131,14 @@ class BarangmasukController extends Controller
             $barang->stok -= abs($difference);
         }
 
-        $barangMasuk = $barang->barangMasuk()->latest()->first();
-        if ($barangMasuk && $request->tgl_keluar < $barangMasuk->tgl_masuk) {
-            return redirect()->back()->withInput()->withErrors(['tgl_keluar' => 'Tanggal keluar tidak boleh sebelum tanggal masuk barang!']);
-        }
+        // $barangMasuk = $barang->barangMasuk()->latest()->first();
+        // if ($barangMasuk && $request->tgl_keluar < $barangMasuk->tgl_masuk) {
+        //     return redirect()->back()->withInput()->withErrors(['tgl_keluar' => 'Tanggal keluar tidak boleh sebelum tanggal masuk barang!']);
+        // }
     
-        $barang->save();
+        // $barang->save();
 
-        //session()->flash('success', 'Data barang masuk berhasil diperbarui');
+        // session()->flash('success', 'Data barang masuk berhasil diperbarui');
     
         return redirect()->route('barangmasuk.index')->with('success', 'Barang masuk berhasil diperbarui');
 

@@ -7,15 +7,16 @@
                 <div class="card">
                     <div class="card-body">
                         <a href="{{ route('barangmasuk.create') }}" class="btn btn-md btn-success">TAMBAH BARANG MASUK</a>
+                        
                         @if(session('success'))
                             <div class="alert alert-success mt-3">
                                 {{ session('success') }}
                             </div>
                         @endif
 
-                        @if(session('Gagal'))
+                        @if(session('error'))
                             <div class="alert alert-danger mt-3">
-                                {{ session('Gagal') }}
+                                {{ session('error') }}
                             </div>
                         @endif
                     </div>
@@ -24,6 +25,21 @@
                 <div class="sort-buttons text-right mt-3 mb-3">
                     <!-- Tambahkan kode dropdown untuk sorting -->
                 </div>
+
+            <form action="{{ route('barangmasuk.index') }}" method="GET">
+                <div class="input-group mb-3">
+                    <input type="text" name="search" class="form-control" placeholder="Cari barang..." value="{{ request()->input('search') }}">
+                    <input type="date" name="tgl_masuk" class="form-control" value="{{ request()->input('tgl_masuk') }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit"><i class="fa fa-search"></i></button>
+                    </div>
+                    @if(request()->filled('search') || request()->filled('tgl_masuk'))
+                        <div class="input-group-append">
+                            <a href="{{ route('barangmasuk.index') }}" class="btn btn-danger"><i class="fa fa-times"></i></a>
+                        </div>
+                    @endif
+                </div>
+            </form>
 
                 <table class="table table-bordered">
                     <thead>
@@ -42,9 +58,9 @@
                                 <td>{{ $bm->id }}</td>
                                 <td>{{ $bm->tgl_masuk }}</td>
                                 <td>{{ $bm->qty_masuk }}</td>
-                                <td>{{ $bm->barang->stok}}</td>
-                                <td>{{ $bm->barang->merk }}</td> <!-- Ubah 'nama' dengan kolom yang tepat -->
-                                <td class="text-center"> 
+                                <td>{{ $bm->barang->stok }}</td>
+                                <td>{{ $bm->barang->merk }}</td>
+                                <td class="text-center">
                                     <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('barangmasuk.destroy', $bm->id) }}" method="POST">
                                         <a href="{{ route('barangmasuk.show', $bm->id) }}" class="btn btn-sm btn-info"><i class="fa fa-eye"></i></a>
                                         <a href="{{ route('barangmasuk.edit', $bm->id) }}" class="btn btn-sm btn-primary"><i class="fa fa-pencil-alt"></i></a>
@@ -56,7 +72,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center">Data Barang Masuk belum tersedia</td>
+                                <td colspan="6" class="text-center">Data Barang Masuk belum tersedia</td>
                             </tr>
                         @endforelse
                     </tbody>

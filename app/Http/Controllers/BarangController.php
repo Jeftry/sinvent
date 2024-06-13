@@ -7,6 +7,7 @@ use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Barangmasuk;
 use App\Models\Barangkeluar;
+use Illuminate\View\View;
 // use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -16,10 +17,23 @@ class BarangController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request) : View
     {
-        $rsetBarang = Barang::latest()->paginate(10);
-        return view('v_barang.index', compact('rsetBarang'));
+        $search = $request->input('search');
+
+        // Ambil semua kategori menggunakan metode getKategoriAll dengan pencarian
+        $rsetBarang = Barang::with('kategori')
+                            ->when($search, function ($query, $search) {
+                            return $query->where('merk', 'like', '%' . $search . '%')
+                                ->orWhere('seri', 'like', '%' . $search . '%')
+                                ->orWhereHas('kategori', function ($query) use ($search) {
+                                $query->where('deskripsi', 'like', '%' . $search . '%');
+                                });
+                        })
+                        ->latest()
+                        ->paginate(10);
+    
+                        return view('v_barang.index', compact('rsetBarang', 'search'));
     }
     
 

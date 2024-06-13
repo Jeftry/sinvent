@@ -12,16 +12,29 @@ class KategoriController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() : View
+    public function index(Request $request) : View
     {
-        // Get all categories using the getKategoriAll method
+        $search = $request->input('search');
+
+        // Ambil semua kategori menggunakan metode getKategoriAll dengan pencarian
         $rsetkategori = Kategori::select('kategori.id', 'deskripsi', 'kategori', DB::raw('ketKategori(kategori.kategori) as ketKategori'))
-                            ->latest()
-                            ->paginate(10);
-        
-        // Render view with categories
-        return view('v_kategori.index', compact('rsetkategori'));
+            ->when($search, function ($query, $search) {
+                return $query->where('deskripsi', 'like', '%' . $search . '%')
+                    ->orWhere(DB::raw('ketKategori(kategori.kategori) COLLATE utf8mb4_unicode_ci'), 'like', '%' . $search . '%')
+                    ->orWhere('kategori.deskripsi', $search)
+                    ->orWhere('kategori', 'like', '%' . $search . '%')
+
+                    ->orWhere('kategori.id', $search); // Menambahkan pencarian berdasarkan ID+
+            })
+
+            //$rsetkategori->appends(['search'=>$search]);
+            //->latest()
+            ->paginate(3);
+            $rsetkategori->appends(['search'=>$search]);
+
+        return view('v_kategori.index', compact('rsetkategori', 'search'));
     }
+
     
 
     
@@ -39,20 +52,28 @@ class KategoriController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi input
         $request->validate([
-            'deskripsi' => 'required',
+            'deskripsi' => 'required|unique:kategori',
             'kategori' => 'required',
+        ], [
+            'deskripsi.required' => 'Deskripsi kategori harus diisi.',
+            'deskripsi.unique' => 'Kategori sudah ada.',
+            'kategori.required' => 'Kategori harus diisi.',
         ]);
 
-        // Create category
+        // Buat kategori baru
         Kategori::create([
             'deskripsi' => $request->deskripsi,
-            'kategori' => $request->kategori
+            'kategori' => $request->kategori,
+            'ketKategori' => $request->ketKategori // Sesuaikan dengan field yang ada di tabel kategori
         ]);
 
-        // Redirect to index
-        return redirect()->route('kategori.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        // Redirect ke halaman index kategori dengan pesan sukses
+        return redirect()->route('kategori.index')->with('success', 'Data Berhasil Disimpan!');
     }
+
+    
 
     /**
      * Display the specified resource.

@@ -22,5 +22,5 @@ class Barang extends Model
         return $this->hasMany(Barangmasuk::class, 'barang_id', 'id');
     }
 
-    
+   
 }

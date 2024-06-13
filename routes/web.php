@@ -8,6 +8,7 @@ use App\Http\Controllers\BarangmasukController;
 use App\Http\Controllers\BarangkeluarController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -17,11 +18,17 @@ Route::get('/', function () {
 //     return view('');
 // });
 
-Route::resource('/kategori', KategoriController::class);
+// Route::get('/', function () {
+//     return view('dashboard');
+// });
+
+Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::resource('/kategori', KategoriController::class)->middleware('auth');
 Route::resource('/categori', CategoryController::class);
-Route::resource('/barang', BarangController::class);
-Route::resource('/barangmasuk', BarangmasukController::class);
-Route::resource('/barangkeluar', BarangkeluarController::class);
+Route::resource('/barang', BarangController::class)->middleware('auth');
+Route::resource('/barangmasuk', BarangmasukController::class)->middleware('auth');
+Route::resource('/barangkeluar', BarangkeluarController::class)->middleware('auth');
 
 Route::get('/login', [LoginController::class,'index'])->name('login')->middleware('guest');
 Route::post('/login', [LoginController::class,'authenticate']);
@@ -33,3 +40,4 @@ Route::resource('/products', \App\Http\Controllers\ProductController::class);
 
 Route::post('register', [RegisterController::class,'store']);
 Route::get('/register', [RegisterController::class,'create']);
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('auth')->name('dashboard');

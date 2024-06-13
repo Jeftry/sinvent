@@ -7,6 +7,13 @@
                 <div class="card">
                     <div class="card-header">Edit Barang Masuk</div>
                     <div class="card-body">
+                        
+                        <!-- Success message -->
+                        @if(session('success'))
+                            <div class="alert alert-success mt-2">
+                                {{ session('success') }}
+                            </div>
+                        @endif
 
                         <form action="{{ route('barangmasuk.update', $barangmasuk->id) }}" method="POST">
                             @csrf

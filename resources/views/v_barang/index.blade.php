@@ -20,26 +20,45 @@
                         @endif
                     </div>
                 </div>
+                <form action="{{ route('barang.index') }}" method="GET">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Cari Barang..." value="{{ request()->input('search') }}">
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" type="submit"><i class="fa fa-search"></i></button>
+                    </div>
+                    @if(request()->filled('search'))
+                        <div class="input-group-append">
+                        <a href="{{ route('barang.index') }}" class="btn btn-secondary"><i class="fa fa-times"></i></a>
+                        </div>
+                        @endif
+                    </div>
+                </form>
+
 
                 <table class="table table-bordered">
                     <thead>
                         <tr>
+                            <th>NO</th>
                             <th>MERK</th>
                             <th>SERI</th>
                             <th>SPESIFIKASI</th>
                             <th>KATEGORI</th>
+                            <th>KATERANGAN</th>
                             <th>STOK</th>
                             <th style="width: 15%">AKSI</th>
 
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($rsetBarang as $rowbarang)
+                        @forelse ($rsetBarang as $index => $rowbarang)
                             <tr>
+                                <td>{{ ++$index }}</td>
                                 <td>{{ $rowbarang->merk }}</td>
                                 <td>{{ $rowbarang->seri  }}</td>
                                 <td>{{ $rowbarang->spesifikasi  }}</td>
-                                <td>{{ $rowbarang->kategori->deskripsi  }}</td>
+                                <td>{{ $rowbarang->kategori->deskripsi }}</td>
+                                <td>{{ $rowbarang->kategori->kategori }}</td>
+
                                 <td>{{ $rowbarang->stok  }}</td>
                                 <!-- <td>{{ $rowbarang->foto  }}</td> -->
                                 <!-- <td class="text-center">
@@ -51,7 +70,8 @@
                                         <a href="{{ route('barang.edit', $rowbarang->id) }}" class="btn btn-sm btn-primary"><i class="fa fa-pencil-alt"></i></a>
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-sm btn-danger" ><i class="fa fa-trash"></i></button>
+
                                     </form>
                                 </td>
                             </tr>
